@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Tb_bairros {
+  bai_id      Int           @id @default(autoincrement())
+  bai_bairro  String
+
+  tb_clientes Tb_clientes[]
+  tb_funcionarios    Tb_funcionarios[]
+}
+
+model Tb_cargos{
+  car_id         Int        @id  @default(autoincrement())
+  car_cargo String
+  car_salario Decimal
+
+  tb_funcionarios    Tb_funcionarios[]
+}
+
+model Tb_funcionarios{
+  
+  fun_id         Int        @id  @default(autoincrement())
+  fun_nome String
+  fun_celular String
+  fun_cpf String @unique 
+  fun_email String
+  fun_logradouro String
+  fun_car_id Int
+  fun_bai_id Int
+ 
+  tb_bairros     Tb_bairros @relation(fields: [fun_bai_id], references: [bai_id])
+  tb_cargos     Tb_cargos @relation(fields: [fun_car_id], references: [car_id])
+}
+
+model Tb_clientes {
+  cli_id         Int        @id  @default(autoincrement())
+  cli_nome       String
+  cli_celular    String
+  cli_email      String
+  cli_cpf        String     @unique
+  cli_logradouro String
+  cli_bai_id     Int
+
+  tb_bairros     Tb_bairros @relation(fields: [cli_bai_id], references: [bai_id])
+  
+}
+
+
+model Tb_statuspedidos {
+  spd_id           Int          @id @default(autoincrement())
+  spd_statuspedido String
+
+  tb_pedidos       Tb_pedidos[]
+}
+
+model Tb_metodospagamentos {
+  mpg_id                Int          @id @default(autoincrement())
+  mpg_metododepagamento String
+
+  tb_pedidos            Tb_pedidos[]
+}
+
+model Tb_menu {
+  men_id        Int     @id @default(autoincrement())
+  men_nome      String
+  men_descricao String
+  men_preco     Decimal
+
+  tb_itenspedidos Tb_itenspedidos []
+
+}
+
+model Tb_itenspedidos{
+  its_id Int @id @default(autoincrement())
+  its_quantidade Int
+  its_men_id Int
+
+  tb_menu Tb_menu @relation(fields: [its_men_id], references: [men_id])
+  
+}
+
+model Tb_pedidos {
+  ped_id               Int                  @id  @default(autoincrement())
+  ped_datahora         DateTime @default(now())
+  ped_spd_id           Int
+  ped_mpg_id           Int
+  ped_valortotal       Decimal
+  ped_observacao       String
+
+  tb_statuspedidos     Tb_statuspedidos     @relation(fields: [ped_spd_id], references: [spd_id])
+  tb_metodospagamentos Tb_metodospagamentos @relation(fields: [ped_mpg_id], references: [mpg_id])
+}
+
+model Tb_fornecedores {
+  for_id               Int                  @id  @default(autoincrement())
+  for_nome String
+  for_cnpj String   @unique
+  for_email String
+  for_celular String
+  for_cep String
+  for_website String 
+
+  tb_entrada Tb_entrada[]
+}
+
+model Tb_entrada {
+  ent_id               Int                  @id  @default(autoincrement())
+  ent_produto String
+  ent_quantidade Int
+  ent_for_id Int
+
+  tb_fornecedores Tb_fornecedores   @relation(fields: [ent_for_id], references: [for_id])
+}
